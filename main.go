@@ -17,6 +17,16 @@ import (
 
 func main() {
 
+	vkClient := api.NewVK(os.Getenv("TOKEN"))
+	groupID, err := strconv.Atoi(os.Getenv("GROUP_ID"))
+	if err != nil {
+		log.Fatalf("ошибка получения id группы: %s", err)
+	}
+	adminID, _ := strconv.Atoi(os.Getenv("ADMIN_ID"))
+	if adminID != 0 {
+		vkClient.MessagesSend(params.NewMessagesSendBuilder().Message(fmt.Sprintf("Произошёл запуск. Сообщу если что-то пойдет не так.")).PeerID(adminID).Params)
+	}
+
 	dsn := "host=localhost user=mvp password=mvp dbname=debt_control port=5432"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
 	if err != nil {
@@ -26,16 +36,6 @@ func main() {
 	debtsRepo, err := repo.NewDebts(db)
 	if err != nil {
 		log.Fatalf("ошибка создания репозитория: %s", err)
-	}
-
-	vkClient := api.NewVK(os.Getenv("TOKEN"))
-	groupID, err := strconv.Atoi(os.Getenv("GROUP_ID"))
-	if err != nil {
-		log.Fatalf("ошибка получения id группы: %s", err)
-	}
-	adminID, _ := strconv.Atoi(os.Getenv("ADMIN_ID"))
-	if adminID != 0 {
-		vkClient.MessagesSend(params.NewMessagesSendBuilder().Message(fmt.Sprintf("Произошёл запуск. Сообщу если что-то пойдет не так.")).PeerID(adminID).Params)
 	}
 
 	notificator := notificator2.NewVKNotificator(vkClient)
