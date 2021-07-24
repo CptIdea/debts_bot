@@ -40,7 +40,7 @@ jobs:
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
           port: ${{ secrets.PORT }}
-          source: ".debts_bot/build"
+          source: "./debts_bot/build"
           target: "/opt/debt_bot/build"
 
 
