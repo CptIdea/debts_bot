@@ -30,9 +30,17 @@ jobs:
           name: build
           path: ./
 
-      - name: Set script executable
-        run: chmod +x ci.sh
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: load on server
+        uses: appleboy/scp-action@v0.1.1
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          port: ${{ secrets.PORT }}
+          source: "build"
+          target: "/opt/debt_bot/build"
 
-      - name: Deploy on server
-        run: ./ci.sh ${{ secrets.remote_server.server }}
 
