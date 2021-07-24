@@ -42,7 +42,7 @@ jobs:
       - name: restart service
         uses: garygrossgarten/github-action-ssh@release
         with:
-          command: ./restart_debt
+          command: ./restart_debt.sh
           host: ${{ secrets.HOST }}
           username: ${{ secrets.USERNAME}}
           password: ${{ secrets.PASSWORD }}
