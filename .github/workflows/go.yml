@@ -33,6 +33,10 @@ jobs:
       - name: debug list
         run: ls --file-type -a
 
+      - name: Debug action
+        uses: hmarr/debug-action@v2.0.0
+
+
       - name: load on server
         uses: appleboy/scp-action@v0.1.1
         with:
