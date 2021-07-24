@@ -218,6 +218,15 @@ func (h *basicHandler) DebtNotify(message object.MessagesMessage) {
 		h.DefaultError(message)
 		return
 	}
+	if debt.LastNotify.Sub(time.Now()) < 30*time.Minute {
+		h.SendText("Напоминать можно раз в 30 минут", message.FromID)
+	}
+
+	debt.LastNotify = time.Now()
+	err = h.repo.Save(debt)
+	if err != nil {
+		log.Printf("ошибка сохранения долга(%s): %s", message.Payload, err)
+	}
 
 	h.SendText("Напомнили о долге", message.FromID)
 	h.notificator.SendNotify(debt, message.FromID)

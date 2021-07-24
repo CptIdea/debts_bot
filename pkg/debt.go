@@ -15,7 +15,8 @@ type Debt struct {
 	Currency    string `gorm:"default:₽"`
 	Description string
 
-	ClosedAt time.Time
+	LastNotify time.Time
+	ClosedAt   time.Time
 }
 
 var (
