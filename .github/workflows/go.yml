@@ -30,6 +30,9 @@ jobs:
           name: build
           path: ./
 
+      - name: Set script executable
+        run: chmod +x ci.sh
+
       - name: Deploy on server
         run: ./ci.sh ${{ secrets.remote_server.server }}
 
