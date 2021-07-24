@@ -219,6 +219,7 @@ func (h *basicHandler) DebtNotify(message object.MessagesMessage) {
 		return
 	}
 
+	h.SendText("Напомнили о долге", message.FromID)
 	h.notificator.SendNotify(debt, message.FromID)
 }
 
