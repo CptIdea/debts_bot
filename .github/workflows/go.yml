@@ -30,13 +30,6 @@ jobs:
           name: build
           path: ./
 
-  deploy:
-    needs:
-      - build
-    runs-on: ubuntu-latest
-    steps:
-      - name: debug list
-        run: ls
       - name: load on server
         uses: appleboy/scp-action@v0.1.1
         with:
@@ -46,5 +39,14 @@ jobs:
           port: ${{ secrets.PORT }}
           source: "./build"
           target: "/opt/debt_bot/build"
+
+  deploy:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
+      - name: debug list
+        run: ls
+
 
 
