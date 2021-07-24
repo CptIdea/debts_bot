@@ -100,8 +100,9 @@ func (h *basicHandler) ConfirmNewDebt(message object.MessagesMessage) {
 		h.notificator.NewDebtNotify(newDebt, message.FromID)
 		if !h.CanSendMessageTo(debtorID) {
 			h.SendStart(message.FromID, "У меня нет доступа к отправке сообщений должнику.\nПерешли ему это сообщение и попроси его написать мне.\nhttps://vk.me/debt_control")
+		} else {
+			h.SendStart(message.FromID, "Отправлен запрос на создание долга.")
 		}
-		h.SendStart(message.FromID, "Отправлен запрос на создание долга.")
 	default:
 		h.Cancel(message.FromID)
 	}
