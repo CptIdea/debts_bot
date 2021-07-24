@@ -70,7 +70,7 @@ func (v *vkNotificator) GenMessageFromDebt(debt *pkg.Debt) string {
 	ans += fmt.Sprintf("Должник: %s\n", v.GetNameById(int(debt.DebtorID)))
 	ans += fmt.Sprintf("Сумма долга: %d %s\n", debt.Sum, debt.Currency)
 	ans += fmt.Sprintf("Статус: %s\n", debt.Status)
-	ans += fmt.Sprintf("Дата создания: %s MOSKOW TIME", debt.CreatedAt.In(time.FixedZone("UTC+3", +3)).Format(time.Stamp))
+	ans += fmt.Sprintf("Дата создания: %s", debt.CreatedAt.Format(time.Stamp))
 
 	return ans
 }

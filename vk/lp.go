@@ -12,22 +12,23 @@ import (
 )
 
 type Client struct {
-	vk          *api.VK
-	lp          *longpoll.LongPoll
-	handler     handler2.Handler
-	nameCache   map[int]string
+	vk        *api.VK
+	lp        *longpoll.LongPoll
+	handler   handler2.Handler
+	nameCache map[int]string
+	groupID   int
 }
 
-func NewClient(vk *api.VK, handler handler2.Handler) (*Client, error) {
+func NewClient(vk *api.VK, handler handler2.Handler, groupID int) (*Client, error) {
 	rand.Seed(time.Now().Unix())
 
 	// Инициализируем longpoll
-	lp, err := longpoll.NewLongPoll(vk, 206046622)
+	lp, err := longpoll.NewLongPoll(vk, groupID)
 	if err != nil {
 		return nil, err
 	}
 
-	c := &Client{lp: lp, vk: vk, handler: handler, nameCache: make(map[int]string)}
+	c := &Client{lp: lp, vk: vk, handler: handler, nameCache: make(map[int]string), groupID: groupID}
 
 	// Событие нового сообщения
 	lp.MessageNew(func(_ context.Context, obj events.MessageNewObject) {
@@ -52,8 +53,17 @@ func NewClient(vk *api.VK, handler handler2.Handler) (*Client, error) {
 		case "Статистика":
 			go c.handler.Stats(obj.Message)
 
+		case "Отмена", "Назад", "Меню":
+			go c.handler.Cancel(obj.Message.FromID)
+
+		case "Новый долг":
+			go c.handler.StartNewDebt(obj.Message)
+
+		case "Закрыть":
+			go c.handler.CloseDebt(obj.Message)
+
 		default:
-			go c.handler.DefaultError(obj.Message)
+			go c.handler.HandleWithPage(obj.Message)
 		}
 	})
 

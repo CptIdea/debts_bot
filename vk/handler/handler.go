@@ -15,6 +15,7 @@ import (
 
 type Handler interface {
 	Start(peer int)
+	Cancel(peer int)
 
 	ConfirmStart(message object.MessagesMessage)
 	RejectStart(message object.MessagesMessage)
@@ -25,16 +26,26 @@ type Handler interface {
 	Stats(message object.MessagesMessage)
 
 	DefaultError(message object.MessagesMessage)
+
+	StartNewDebt(message object.MessagesMessage)
+	SetDebtor(message object.MessagesMessage)
+	SetSum(message object.MessagesMessage)
+	ConfirmNewDebt(message object.MessagesMessage)
+
+	HandleWithPage(message object.MessagesMessage)
+
+	CloseDebt(message object.MessagesMessage)
 }
 
 type basicHandler struct {
 	repo        repo.Debts
 	vk          *api.VK
 	notificator notificator.Notificator
+	groupID     int
 }
 
 func (h *basicHandler) Start(peer int) {
-	h.SendStart(peer)
+	h.SendStart(peer, "Привет! Если у тебя есть заявки, то сейчас их отправлю.")
 	time.Sleep(3 * time.Second)
 	h.SetPage(peer, "start")
 	debts, err := h.repo.GetListByDebtorID(uint(peer))
@@ -65,6 +76,11 @@ func (h *basicHandler) ConfirmStart(message object.MessagesMessage) {
 		log.Printf("ошибка подтверждения долга(%s): %s", message.Payload, err)
 	}
 	h.SendText(fmt.Sprintf("Долг #%d подтвержден. Отлично.", id), message.FromID)
+	debt, err := h.repo.GetByDebtID(uint(id))
+	if err != nil {
+		log.Printf("ошибка получения долга из базы: %s", err)
+	}
+	h.notificator.NewStatusNotify(debt, message.FromID)
 	log.Printf("Долг #%d подтвержден.", id)
 }
 
@@ -78,12 +94,12 @@ func (h *basicHandler) RejectStart(message object.MessagesMessage) {
 		log.Printf("ошибка отклонения долга(%s): %s", message.Payload, err)
 	}
 	h.SendText(fmt.Sprintf("Долг #%d отклонён. Отлично.", id), message.FromID)
+	debt, err := h.repo.GetByDebtID(uint(id))
+	if err != nil {
+		log.Printf("ошибка получения долга из базы: %s", err)
+	}
+	h.notificator.NewStatusNotify(debt, message.FromID)
 	log.Printf("Долг #%d отклонён.", id)
-}
-
-func NewHandler(repo repo.Debts, vk *api.VK, notificator notificator.Notificator) Handler {
-	rand.Seed(time.Now().Unix())
-	return &basicHandler{repo: repo, vk: vk, notificator: notificator}
 }
 
 func (h *basicHandler) DefaultError(message object.MessagesMessage) {
@@ -101,7 +117,10 @@ func (h *basicHandler) MyDebts(message object.MessagesMessage) {
 		debts = debts[:9]
 	}
 	for _, debt := range debts {
-		h.notificator.SendNotify(debt, int(debt.LenderID))
+		h.SendTextWithKeyboard(h.notificator.GenMessageFromDebt(debt), message.FromID, h.GenCloseInlineKeyboard(int(debt.ID)))
+	}
+	if len(debts) == 0 {
+		h.SendText("Тут пока ничего нет", message.FromID)
 	}
 }
 
@@ -115,7 +134,10 @@ func (h *basicHandler) MyDebtors(message object.MessagesMessage) {
 		debts = debts[:9]
 	}
 	for _, debt := range debts {
-		h.notificator.SendNotify(debt, int(debt.DebtorID))
+		h.SendTextWithKeyboard(h.notificator.GenMessageFromDebt(debt), message.FromID, h.GenCloseInlineKeyboard(int(debt.ID)))
+	}
+	if len(debts) == 0 {
+		h.SendText("Тут пока ничего нет", message.FromID)
 	}
 }
 
@@ -141,4 +163,41 @@ func (h *basicHandler) Stats(message object.MessagesMessage) {
 	h.SendText(fmt.Sprintf("Ты должен: %d\nТебе должны: %d", minus, plus), message.FromID)
 }
 
+func (h *basicHandler) Cancel(peer int) {
+	h.SetPage(peer, "start")
+	h.SendStart(peer, "Отмена.")
+}
 
+func (h *basicHandler) CloseDebt(message object.MessagesMessage) {
+	debtID, err := strconv.Atoi(message.Payload)
+	if err != nil {
+		log.Printf("ошибка парсинга ид долга")
+		h.DefaultError(message)
+		return
+	}
+
+	debt, err := h.repo.GetByDebtID(uint(debtID))
+	if err != nil {
+		log.Printf("ошибка получения долга из базы: %s", err)
+	}
+
+	if debt.LenderID == int64(message.FromID) {
+		err := h.repo.SetStatus(debt.ID, pkg.DebtStatusClosed)
+		if err != nil {
+			log.Printf("ошибка смены статуса: %s", err)
+		}
+		debt.Status = pkg.DebtStatusClosed
+		h.notificator.SendNotify(debt, message.FromID)
+		h.SendText(fmt.Sprintf("Долг #%d закрыт", debtID), message.FromID)
+	} else {
+		debt.Status = pkg.DebtStatusStopWaiting
+		h.SendTextWithKeyboard(fmt.Sprintf("Должник предлагает закрыть долг\n\n %s", h.notificator.GenMessageFromDebt(debt)), int(debt.LenderID), h.GenCloseInlineKeyboard(debtID))
+		h.SendText(fmt.Sprintf("Кредитору отправлен запрос на закрытие долга #%d", debtID), message.FromID)
+	}
+
+}
+
+func NewHandler(repo repo.Debts, vk *api.VK, notificator notificator.Notificator, groupID int) Handler {
+	rand.Seed(time.Now().Unix())
+	return &basicHandler{repo: repo, vk: vk, notificator: notificator, groupID: groupID}
+}

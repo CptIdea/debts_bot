@@ -10,7 +10,7 @@ type Debt struct {
 	LenderID    int64
 	DebtorID    int64
 	AuthorID    int64
-	Status      string `gorm:"default:подтверждение"`
+	Status      string `gorm:"default:ожидание начала"`
 	Sum         int64
 	Currency    string `gorm:"default:₽"`
 	Description string

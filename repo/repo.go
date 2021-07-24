@@ -17,12 +17,12 @@ type Debts interface {
 }
 
 func (d *debts) GetActiveListByLenderID(id uint) (ans []*pkg.Debt, err error) {
-	err = d.db.Where("lender_id = ?", id).Where("status != ?", pkg.DebtStatusClosed).Find(&ans).Error
+	err = d.db.Where("lender_id = ?", id).Where("status = ? or status = ?", pkg.DebtStatusActive, pkg.DebtStatusStopWaiting).Order("sum").Find(&ans).Error
 	return
 }
 
 func (d *debts) GetActiveListByDebtorID(id uint) (ans []*pkg.Debt, err error) {
-	err = d.db.Where("debtor_id = ?", id).Where("status != ?", pkg.DebtStatusClosed).Find(&ans).Error
+	err = d.db.Where("debtor_id = ?", id).Where("status = ? or status = ?", pkg.DebtStatusActive, pkg.DebtStatusStopWaiting).Order("sum").Find(&ans).Error
 	return
 }
 
@@ -47,7 +47,7 @@ func (d *debts) GetListByDebtorID(id uint) (ans []*pkg.Debt, err error) {
 func (d *debts) GetByDebtID(id uint) (*pkg.Debt, error) {
 	var ans pkg.Debt
 	err := d.db.Where("id = ?", id).First(&ans).Error
-	return &ans,err
+	return &ans, err
 }
 
 func (d *debts) SetStatus(id uint, status string) error {

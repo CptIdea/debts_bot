@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm"
 	"log"
 	"os"
+	"strconv"
 )
 
 func main() {
@@ -26,14 +27,16 @@ func main() {
 	}
 
 	vkClient := api.NewVK(os.Getenv("TOKEN"))
+	groupID, err := strconv.Atoi(os.Getenv("GROUP_ID"))
+	if err != nil {
+		log.Fatalf("ошибка получения id группы: %s", err)
+	}
 
 	notificator := notificator2.NewVKNotificator(vkClient)
 
-	handler := handler2.NewHandler(debtsRepo, vkClient,notificator)
+	handler := handler2.NewHandler(debtsRepo, vkClient, notificator, groupID)
 
-
-
-	client, err := vk.NewClient(vkClient, handler)
+	client, err := vk.NewClient(vkClient, handler, groupID)
 	if err != nil {
 		log.Fatalf("ошибка создания клиента:%s", err)
 	}
