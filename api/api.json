@@ -1,0 +1,206 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Debt control API",
+    "description": "API для системы управления долгами",
+    "version": "1.0.0"
+  },
+  "schemes": [
+    "https",
+    "http"
+  ],
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "security": [
+    {
+      "Bearer": []
+    }
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/debts/{id}/confirmStart": {
+      "get": {
+        "description": "подтверждение активации долга",
+        "responses": {
+          "200": {
+            "$ref": "#/definitions/changeStatusResponse"
+          },
+          "400": {
+            "$ref": "#/definitions/error"
+          }
+        }
+      }
+    },
+    "/debts/{id}/confirmStop": {
+      "get": {
+        "description": "подтверждение закрытия долга",
+        "responses": {
+          "200": {
+            "$ref": "#/definitions/changeStatusResponse"
+          },
+          "400": {
+            "$ref": "#/definitions/error"
+          }
+        }
+      }
+    },
+    "/debts/{id}": {
+      "get": {
+        "description": "подтверждение закрытия долга",
+        "responses": {
+          "200": {
+            "$ref": "#/definitions/changeStatusResponse"
+          },
+          "400": {
+            "$ref": "#/definitions/error"
+          }
+        }
+      }
+    },
+    "/debts": {
+      "get": {
+        "description": "получение долгов, где пользователь - кредитор",
+        "responses": {
+          "200": {
+            "$ref": "#/definitions/debtList"
+          },
+          "400": {
+            "$ref": "#/definitions/error"
+          }
+        }
+      },
+      "post": {
+        "description": "создание нового долга",
+        "parameters": [
+          {
+            "$ref": "#/definitions/debt"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/definitions/debt"
+          },
+          "400": {
+            "$ref": "#/definitions/error"
+          }
+        }
+      }
+    },
+    "/login": {
+      "post": {
+        "security": [],
+        "description": "получения bearer токена",
+        "responses": {
+          "200": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "token": {
+                  "type": "string"
+                }
+              }
+            },
+            "description": "корректный ответ, содержащий токен"
+          },
+          "400": {
+            "$ref": "#/definitions/error"
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "error": {
+      "type": "object",
+      "properties": {
+        "message": {
+          "type": "string",
+          "description": "сообщение ошибки"
+        }
+      }
+    },
+    "debt": {
+      "type": "object",
+      "description": "объект долга",
+      "required": [
+        "lenderID",
+        "debtorID",
+        "sum"
+      ],
+      "properties": {
+        "id": {
+          "type": "integer",
+          "readOnly": true
+        },
+        "lenderID": {
+          "type": "integer"
+        },
+        "debtorID": {
+          "type": "integer"
+        },
+        "authorID": {
+          "type": "integer",
+          "readOnly": true
+        },
+        "status": {
+          "$ref": "#/definitions/debtStatus",
+          "readOnly": true
+        },
+        "sum": {
+          "type": "integer"
+        },
+        "description": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "integer",
+          "readOnly": true
+        },
+        "closedAt": {
+          "type": "integer",
+          "readOnly": true
+        }
+      }
+    },
+    "debtStatus": {
+      "type": "string",
+      "enum": [
+        "ожидание начала",
+        "в процессе",
+        "закрыт",
+        "ожидание закрытия",
+        "отменен"
+      ]
+    },
+    "debtList": {
+      "type": "array",
+      "items": {
+        "$ref": "#/definitions/debt"
+      }
+    },
+    "changeStatusResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string"
+        },
+        "debtId": {
+          "type": "integer"
+        }
+      }
+    }
+  }
+}
