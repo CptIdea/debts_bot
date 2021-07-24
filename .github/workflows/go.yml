@@ -31,7 +31,7 @@ jobs:
           path: ./
 
       - name: debug list
-        run: ls ../ --file-type
+        run: ls --file-type -a
 
       - name: load on server
         uses: appleboy/scp-action@v0.1.1
