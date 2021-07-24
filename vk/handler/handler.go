@@ -218,8 +218,9 @@ func (h *basicHandler) DebtNotify(message object.MessagesMessage) {
 		h.DefaultError(message)
 		return
 	}
-	if debt.LastNotify.Sub(time.Now()) < 30*time.Minute {
+	if time.Now().Sub(debt.LastNotify) < 30*time.Minute {
 		h.SendText("Напоминать можно раз в 30 минут", message.FromID)
+		return
 	}
 
 	debt.LastNotify = time.Now()
