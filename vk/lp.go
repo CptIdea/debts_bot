@@ -35,7 +35,7 @@ func NewClient(vk *api.VK, handler handler2.Handler, groupID int) (*Client, erro
 		log.Printf("%d: %s, %s", obj.Message.PeerID, obj.Message.Text, obj.Message.Payload)
 
 		switch obj.Message.Text {
-		case "Начать":
+		case "Начать", "Start":
 			go c.handler.Start(obj.Message.FromID)
 
 		case "Подтвердить":
