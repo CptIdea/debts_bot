@@ -101,6 +101,7 @@ func (h *basicHandler) ConfirmNewDebt(message object.MessagesMessage) {
 		if !h.CanSendMessageTo(debtorID) {
 			h.SendStart(message.FromID, "У меня нет доступа к отправке сообщений должнику.\nПерешли ему это сообщение и попроси его написать мне.\nhttps://vk.me/debt_control")
 		}
+		h.SendStart(message.FromID, "Отправлен запрос на создание долга.")
 	default:
 		h.Cancel(message.FromID)
 	}

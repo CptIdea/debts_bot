@@ -194,7 +194,7 @@ func (h *basicHandler) CloseDebt(message object.MessagesMessage) {
 		}
 		debt.Status = pkg.DebtStatusClosed
 		h.notificator.SendNotify(debt, message.FromID)
-		h.SendText(fmt.Sprintf("Долг #%d закрыт", debtID), message.FromID)
+		h.SendStart(message.FromID, fmt.Sprintf("Долг #%d закрыт", debtID))
 	} else {
 		debt.Status = pkg.DebtStatusStopWaiting
 		h.SendTextWithKeyboard(fmt.Sprintf("Должник предлагает закрыть долг\n\n %s", h.notificator.GenMessageFromDebt(debt)), int(debt.LenderID), h.GenCloseInlineKeyboard(debtID))
