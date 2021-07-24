@@ -35,6 +35,8 @@ type Handler interface {
 	HandleWithPage(message object.MessagesMessage)
 
 	CloseDebt(message object.MessagesMessage)
+
+	DebtNotify(message object.MessagesMessage)
 }
 
 type basicHandler struct {
@@ -201,6 +203,22 @@ func (h *basicHandler) CloseDebt(message object.MessagesMessage) {
 		h.SendText(fmt.Sprintf("Кредитору отправлен запрос на закрытие долга #%d", debtID), message.FromID)
 	}
 
+}
+
+func (h *basicHandler) DebtNotify(message object.MessagesMessage) {
+	id, err := strconv.Atoi(message.Payload)
+	if err != nil {
+		log.Printf("ошибка конвертации id долга(%s): %s", message.Payload, err)
+		h.DefaultError(message)
+		return
+	}
+	debt, err := h.repo.GetByDebtID(uint(id))
+	if err != nil {
+		log.Printf("ошибка получения долга(%s): %s", message.Payload, err)
+		h.DefaultError(message)
+		return
+	}
+	h.notificator.NewStatusNotify(debt, message.FromID)
 }
 
 func NewHandler(repo repo.Debts, vk *api.VK, notificator notificator.Notificator, groupID int) Handler {

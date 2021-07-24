@@ -191,6 +191,7 @@ func (h *basicHandler) GenCloseInlineKeyboard(debtId int) *object.MessagesKeyboa
 	kb.Inline = true
 	kb.AddRow()
 	kb.AddTextButton("Закрыть", debtId, "secondary")
+	kb.AddTextButton("Напомнить", debtId, "secondary")
 
 	return kb
 }

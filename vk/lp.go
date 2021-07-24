@@ -62,6 +62,9 @@ func NewClient(vk *api.VK, handler handler2.Handler, groupID int) (*Client, erro
 		case "Закрыть":
 			go c.handler.CloseDebt(obj.Message)
 
+		case "Напомнить":
+			go c.handler.DebtNotify(obj.Message)
+
 		default:
 			go c.handler.HandleWithPage(obj.Message)
 		}
