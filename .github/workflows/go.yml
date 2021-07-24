@@ -29,3 +29,7 @@ jobs:
         with:
           name: build
           path: ./
+
+      - name: Deploy on server
+        run: ./ci.sh ${{ secrets.remote_server.server }}
+
