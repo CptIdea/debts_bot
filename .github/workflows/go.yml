@@ -30,13 +30,12 @@ jobs:
           name: build
           path: ./
 
-      - name: debug list
-        run: ls --file-type -a
 
-      - name: Debug action
-        uses: hmarr/debug-action@v2.0.0
-
-
+  deploy:
+    needs:
+      - build
+    runs-on: ubuntu-latest
+    steps:
       - name: load on server
         uses: appleboy/scp-action@v0.1.1
         with:
@@ -45,6 +44,14 @@ jobs:
           password: ${{ secrets.PASSWORD }}
           source: "./build"
           target: "/opt/debt_bot/build"
+      - name: restart service
+        uses: garygrossgarten/github-action-ssh@release
+        with:
+          command: ./restart_debt
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME}}
+          password: ${{ secrets.PASSWORD }}
+
 
 
 
