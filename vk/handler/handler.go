@@ -218,7 +218,8 @@ func (h *basicHandler) DebtNotify(message object.MessagesMessage) {
 		h.DefaultError(message)
 		return
 	}
-	h.notificator.NewStatusNotify(debt, message.FromID)
+
+	h.notificator.SendNotify(debt, message.FromID)
 }
 
 func NewHandler(repo repo.Debts, vk *api.VK, notificator notificator.Notificator, groupID int) Handler {
