@@ -5,7 +5,9 @@ import (
 	"debts_bot/vk"
 	handler2 "debts_bot/vk/handler"
 	notificator2 "debts_bot/vk/notificator"
+	"fmt"
 	"github.com/SevereCloud/vksdk/v2/api"
+	"github.com/SevereCloud/vksdk/v2/api/params"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -31,6 +33,10 @@ func main() {
 	if err != nil {
 		log.Fatalf("ошибка получения id группы: %s", err)
 	}
+	adminID, _ := strconv.Atoi(os.Getenv("ADMIN_ID"))
+	if adminID != 0 {
+		vkClient.MessagesSend(params.NewMessagesSendBuilder().Message(fmt.Sprintf("Произошёл запуск. Сообщу если что-то пойдет не так.")).PeerID(adminID).Params)
+	}
 
 	notificator := notificator2.NewVKNotificator(vkClient)
 
@@ -38,11 +44,17 @@ func main() {
 
 	client, err := vk.NewClient(vkClient, handler, groupID)
 	if err != nil {
+		if adminID != 0 {
+			vkClient.MessagesSend(params.NewMessagesSendBuilder().Message(fmt.Sprintf("ОШИБКА. Ошибка создания клиента %s", err)).PeerID(adminID).Params)
+		}
 		log.Fatalf("ошибка создания клиента:%s", err)
 	}
 
 	err = client.Start()
 	if err != nil {
+		if adminID != 0 {
+			vkClient.MessagesSend(params.NewMessagesSendBuilder().Message(fmt.Sprintf("ОШИБКА. Ошибка работы клиента %s", err)).PeerID(adminID).Params)
+		}
 		log.Fatalf("ошибка работы клиента:%s", err)
 	}
 }
