@@ -70,15 +70,18 @@ func (h *basicHandler) ConfirmStart(message object.MessagesMessage) {
 	id, err := strconv.Atoi(message.Payload)
 	if err != nil {
 		log.Printf("ошибка конвертации id долга(%s): %s", message.Payload, err)
+		return
 	}
 	err = h.repo.SetStatus(uint(id), pkg.DebtStatusActive)
 	if err != nil {
 		log.Printf("ошибка подтверждения долга(%s): %s", message.Payload, err)
+		return
 	}
 	h.SendText(fmt.Sprintf("Долг #%d подтвержден. Отлично.", id), message.FromID)
 	debt, err := h.repo.GetByDebtID(uint(id))
 	if err != nil {
 		log.Printf("ошибка получения долга из базы: %s", err)
+		return
 	}
 	h.notificator.NewStatusNotify(debt, message.FromID)
 	log.Printf("Долг #%d подтвержден.", id)
@@ -88,15 +91,18 @@ func (h *basicHandler) RejectStart(message object.MessagesMessage) {
 	id, err := strconv.Atoi(message.Payload)
 	if err != nil {
 		log.Printf("ошибка конвертации id долга(%s): %s", message.Payload, err)
+		return
 	}
 	err = h.repo.SetStatus(uint(id), pkg.DebtStatusCanceled)
 	if err != nil {
 		log.Printf("ошибка отклонения долга(%s): %s", message.Payload, err)
+		return
 	}
 	h.SendText(fmt.Sprintf("Долг #%d отклонён. Отлично.", id), message.FromID)
 	debt, err := h.repo.GetByDebtID(uint(id))
 	if err != nil {
 		log.Printf("ошибка получения долга из базы: %s", err)
+		return
 	}
 	h.notificator.NewStatusNotify(debt, message.FromID)
 	log.Printf("Долг #%d отклонён.", id)

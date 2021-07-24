@@ -2,6 +2,7 @@ package repo
 
 import (
 	"debts_bot/pkg"
+	"fmt"
 	"gorm.io/gorm"
 	"time"
 )
@@ -56,6 +57,12 @@ func (d *debts) SetStatus(id uint, status string) error {
 		return err
 	}
 
+	if status == debt.Status {
+		return fmt.Errorf("статус не изменился")
+	}
+	if status == pkg.DebtStatusCanceled && debt.Status == pkg.DebtStatusActive {
+		return fmt.Errorf("невозможно отменить активный долг")
+	}
 	debt.Status = status
 	if status == pkg.DebtStatusClosed {
 		debt.ClosedAt = time.Now()
