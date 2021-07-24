@@ -150,7 +150,7 @@ func (h *basicHandler) GenDebtorsKeyboard(peer int) *object.MessagesKeyboard {
 			continue
 		}
 		kb.AddRow()
-		kb.AddTextButton(h.notificator.GetNameById(id), s, "primary")
+		kb.AddTextButton(h.notificator.GetNameById(id), s, "secondary")
 		i += 1
 		if i > 8 {
 			break
